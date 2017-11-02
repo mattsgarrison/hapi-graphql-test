@@ -1,7 +1,7 @@
-import { find, merge } from 'lodash';
+import { filter, find, merge } from 'lodash';
 import { makeExecutableSchema } from 'graphql-tools';
 
-// import { resolvers } from './example-resolvers.mjs';
+import { resolvers } from './example-resolvers.mjs';
 const authors = [
   { id: 1, firstName: 'Tom', lastName: 'Coleman' },
   { id: 2, firstName: 'Sashko', lastName: 'Stubailo' },
@@ -34,6 +34,7 @@ const Post = `
 const Query = `
   # the schema allows the following query:
   type Query {
+    hello: String
     posts: [Post]
     author(id: Int!): Author
   }
@@ -47,29 +48,6 @@ const Mutation = `
     ): Post
   }
 `;
-
-const resolvers = {
-  Query: {
-    posts: () => posts,
-    author: (_, { id }) => find(authors, { id: id }),
-  },
-  Mutation: {
-    upvotePost: (_, { postId }) => {
-      const post = find(posts, { id: postId });
-      if (!post) {
-        throw new Error(`Couldn't find post with id ${postId}`);
-      }
-      post.votes += 1;
-      return post;
-    },
-  },
-  Author: {
-    posts: (author) => filter(posts, { authorId: author.id }),
-  },
-  Post: {
-    author: (post) => find(authors, { id: post.authorId }),
-  },
-};
 
 export const schema = makeExecutableSchema({
   typeDefs: [Author, Post, Query, Mutation],

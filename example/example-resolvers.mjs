@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { find, filter } from 'lodash';
 
 const authors = [
   { id: 1, firstName: 'Tom', lastName: 'Coleman' },
@@ -14,23 +14,40 @@ const posts = [
 
 export const resolvers = {
   Query: {
-    posts: () => posts,
-    author: (_, { id }) => _.find(authors, { id: id }),
+    hello: {
+      description: 'Hello World',
+      resolve: () => {
+        return 'hello world!';
+      } 
+    },
+    posts: {
+      description: 'Returns the post mocks',
+      resolve: () => posts,
+    },
+    author: {
+      description: 'Returns the individual author mock',
+      resolve: (_, { id }) => find(authors, { id: id }),
+    }
   },
   Mutation: {
-    upvotePost: (_, { postId }) => {
-      const post = _.find(posts, { id: postId });
-      if (!post) {
-        throw new Error(`Couldn't find post with id ${postId}`);
+    // Description for upvotePost
+    // upvotes the post's votes and returns the value
+    upvotePost: {
+      description: 'Upvote a post by id',
+      resolve: (_, { postId }) => {
+        const post = find(posts, { id: postId });
+        if (!post) {
+          throw new Error(`Couldn't find post with id ${postId}`);
+        }
+        post.votes += 1;
+        return post;
       }
-      post.votes += 1;
-      return post;
     },
   },
   Author: {
-    posts: (author) => _.filter(posts, { authorId: author.id }),
+    posts: (author) => filter(posts, { authorId: author.id }),
   },
   Post: {
-    author: (post) => _.find(authors, { id: post.authorId }),
+    author: (post) => find(authors, { id: post.authorId }),
   },
 };
