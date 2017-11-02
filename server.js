@@ -1,38 +1,26 @@
 import hapi from 'hapi';
 import { graphqlHapi, graphiqlHapi } from 'apollo-server-hapi';
+import { schema as exampleSchema } from './example/example-schema.mjs';
+
+import { addErrorLoggingToSchema } from 'graphql-tools';
+const logger = { log: (e) => console.error(e.stack) };
+addErrorLoggingToSchema(exampleSchema, logger);
+
 const server = new hapi.Server();
-const HOST = 'localhost';
+const HOST = '0.0.0.0';
 const PORT = 3000;
 
-const GraphQLSchema = {};
+
 const GraphQLOptions = {
-  schema: GraphQLSchema,
-  
-  //rootValue?: any,
-  
-  //context?: any,
-  
-  //formatError?: Function,
-  
-  //logFunction?: Function,
-  
-  //formatParams?: Function,
-  
-  //validationRules?: Array<ValidationRule>,
-  
-  //formatResponse?: Function
-  
-  //fieldResolver?: Function
-  
-  debug: true
+  schema: exampleSchema,
 };
 
 server.connection({
-    host: HOST,
-    port: PORT,
+    // host: HOST,
+    port: PORT
 });
 
-/** 
+/**
  * Register the main graphql endpoint
  */
 server.register({
@@ -40,6 +28,9 @@ server.register({
   options: {
     path: '/graphql',
     graphqlOptions: GraphQLOptions,
+    route: {
+      cors: true
+    }
   },
 });
 
@@ -50,6 +41,7 @@ server.register({
   register: graphiqlHapi,
   options: {
     path: '/graphiql',
+    schema: exampleSchema,
     graphiqlOptions: {
       endpointURL: '/graphql',
     },
